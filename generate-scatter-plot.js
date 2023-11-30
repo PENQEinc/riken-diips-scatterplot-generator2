@@ -37,7 +37,7 @@ tsvFiles.forEach((file) => {
     .domain(d3.extent(data, (d) => +d.UMAP_2))
     .range([height, 0]);
 
-  // 散布図を描画
+  // 散布図を描画（カラーコードを反映）
   svg
     .selectAll("circle")
     .data(data)
@@ -46,7 +46,7 @@ tsvFiles.forEach((file) => {
     .attr("cx", (d) => xScale(+d.UMAP_1))
     .attr("cy", (d) => yScale(+d.UMAP_2))
     .attr("r", 5)
-    .attr("fill", "blue"); // ここでは全ての点を青色で描画
+    .attr("fill", (d) => d.color_A951); // ここでカラーコードを適用
 
   // SVGを文字列として取得
   const svgString = body.select("svg").node().outerHTML;
