@@ -13,6 +13,14 @@ const tsvFiles = fs
 // SVGの設定
 const width = 800;
 const height = 600;
+const margin = { top: 20, right: 20, bottom: 40, left: 40 };
+const colorColumns = [
+  "color_A951",
+  "color_A952",
+  "color_A953",
+  "color_A954",
+  "color_A955",
+]; // 色列のリスト
 
 tsvFiles.forEach((file) => {
   // TSVファイルを読み込む
@@ -30,23 +38,35 @@ tsvFiles.forEach((file) => {
   const xScale = d3
     .scaleLinear()
     .domain(d3.extent(data, (d) => +d.UMAP_1))
-    .range([0, width]);
+    .range([margin.left, width - margin.right]);
 
   const yScale = d3
     .scaleLinear()
     .domain(d3.extent(data, (d) => +d.UMAP_2))
-    .range([height, 0]);
+    .range([height - margin.bottom, margin.top]);
 
-  // 散布図を描画（カラーコードを反映）
+  // 軸の生成
+  const xAxis = d3.axisBottom(xScale).ticks(10);
+  const yAxis = d3.axisLeft(yScale).ticks(10);
+
+  // X軸とY軸をSVGに追加
   svg
-    .selectAll("circle")
-    .data(data)
-    .enter()
-    .append("circle")
-    .attr("cx", (d) => xScale(+d.UMAP_1))
-    .attr("cy", (d) => yScale(+d.UMAP_2))
-    .attr("r", 5)
-    .attr("fill", (d) => d.color_A951); // ここでカラーコードを適用
+    .append("g")
+    .attr("transform", `translate(0,${height - margin.bottom})`)
+    .call(xAxis);
+  svg.append("g").attr("transform", `translate(${margin.left},0)`).call(yAxis);
+
+  // 各ノードに対して複数の円を描画
+  data.forEach((d) => {
+    colorColumns.forEach((col, index) => {
+      svg
+        .append("circle")
+        .attr("cx", xScale(+d.UMAP_1))
+        .attr("cy", yScale(+d.UMAP_2))
+        .attr("r", 5 - index) // 異なる半径で重なりを防ぐ
+        .attr("fill", d[col]);
+    });
+  });
 
   // SVGを文字列として取得
   const svgString = body.select("svg").node().outerHTML;
