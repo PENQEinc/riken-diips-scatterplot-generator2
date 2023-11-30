@@ -56,15 +56,25 @@ tsvFiles.forEach((file) => {
     .call(xAxis);
   svg.append("g").attr("transform", `translate(${margin.left},0)`).call(yAxis);
 
-  // 各ノードに対して複数の円を描画
+  // 各ノードに対して色をブレンドして描画
   data.forEach((d) => {
     colorColumns.forEach((col, index) => {
+      let color = d3.color(d[col]);
+
+      // ニュートラルな色の透明度を下げる
+      if (color && color.hex() === "#e5e5e5") {
+        color.opacity *= 0.2; // 透明度を20%に設定
+      } else {
+        color.opacity *= 0.5;
+      }
+
       svg
         .append("circle")
         .attr("cx", xScale(+d.UMAP_1))
         .attr("cy", yScale(+d.UMAP_2))
-        .attr("r", 5 - index) // 異なる半径で重なりを防ぐ
-        .attr("fill", d[col]);
+        .attr("r", 2)
+        .attr("fill", color)
+        .style("mix-blend-mode", "multiply");
     });
   });
 
